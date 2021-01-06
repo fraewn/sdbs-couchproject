@@ -1,0 +1,34 @@
+Ideen Datenmodell 
+
+Profil 
+- pw 
+- username 
+- email 
+- zertifikate 
+	- xy 
+	- z 
+- mitglied_seit_datum 
+- stufe (?) z.B. bei drei Zertifkaten krasser zertifikatboy 
+
+
+Zertifikat 
+- bereich 
+- key? 
+- level 
+- namen "tolles zertifikat"
+- bezeichnung (zert1ky3)
+- downloadadresse 
+- sprache 
+
+
+
+Zertifikatgruppen/ 
+- z1 (level 1)
+- z2 (level 2)
+- z3 ... 
+--> bilden dann Gesamtzertifikat 
+
+
+einem Profil können Zertifikate zugeordnet werden (ein key pro profil)
+
+
