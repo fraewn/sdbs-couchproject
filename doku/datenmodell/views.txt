@@ -1,0 +1,3 @@
+- profil angucken
+- view die alle zertifkate anzeigt mit suche ndanach/ filter
+- zertifikat downloaden view

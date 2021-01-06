@@ -11,8 +11,10 @@ Profil
 - stufe (?) z.B. bei drei Zertifkaten krasser zertifikatboy 
 
 
+
 Zertifikat 
-- bereich 
+- bereich
+- level
 - key? 
 - level 
 - namen "tolles zertifikat"
@@ -30,5 +32,11 @@ Zertifikatgruppen/
 
 
 einem Profil können Zertifikate zugeordnet werden (ein key pro profil)
+
+
+Offene Fragen:
+- Was passiert wenn ein Zertifikat generisch geändert werden muss?
+z.B. Example GmbH wird zu Example AG
+Muss dann für jeden User geschaut werden, ob er ein Zertifkat der Example GmbH hat und das wird zu Example AG geändert?
 
 

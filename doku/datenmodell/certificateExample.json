@@ -1,0 +1,35 @@
+{
+  "certificates": {
+    "certificate": {
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de",
+      "field": "information technology",
+      "skillfields": [
+        "telecommunication",
+        "networking"
+      ],
+      "issued_certificates": [
+        {
+          "id": "ciscnet1"
+        }
+      ]
+    }
+  },
+  "certificate": {
+    "company": "Example Gmbh",
+    "registration_date": "01.01.2010",
+    "contact": "mueller@example-gmbh.de",
+    "field": "information technology",
+    "skillfields": [
+      "telecommunication",
+      "networking"
+    ],
+    "issued_certificates": [
+      {
+        "id": "ciscnet2"
+      }
+    ]
+  }
+  }
+}
