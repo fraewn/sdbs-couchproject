@@ -66,11 +66,17 @@ asyncCall();
 
 
 app.post('/form', function(req, res){
-  console.log(req.body);
   res.send("recieved your request!");
+  console.log(req.body);
 
-  //TODO hier aus dem request den kram erstellen
+  const insertResponse = certstore.insert({_id: "test1", "type": "user", "name": req.body.name, "surname": req.body.surname,
+    "password": req.body.password, "email": req.body.email, "workfield": req.body.workfield}, (error, response) => {
+  })
+
+  console.log("Entry was saved in CouchDB.")
+
 });
+
 
 
 app.get('/', async (req, res) => {
