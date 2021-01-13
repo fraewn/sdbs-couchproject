@@ -1,0 +1,42 @@
+{
+    "type": "user",
+    "name": "Fabian",
+    "surname": "Stotz",
+    "registration_date": "01.01.2021",
+    "password": "example",
+    "email": "fst800@gmx.de",
+    "workfield": "information technology",
+    "certificates": [{
+      "id": "ciscnet1",
+      "skillfield": "information technology",
+      "name": "cisco network certificate",
+      "level": 1,
+      "issued": "01.01.2012",
+      "exceeds": "01.01.2030",
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de"
+    }, {
+      "id": "BI500",
+      "skillfield": "Business Intelligence",
+      "name": "Reporting Certificate",
+      "level": 2,
+      "issued": "01.03.2012",
+      "exceeds": "01.03.2030",
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de"
+    },{
+      "id": "cert5000",
+      "skillfield": "business administration",
+      "name": "also a nice certificate",
+      "level": 1,
+      "issued": "01.09.2014",
+      "exceeds": "01.09.2999",
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de"
+    }]
+}
+
+

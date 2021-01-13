@@ -21,10 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="90ce087c-f73a-44d3-8e60-c931082e8120" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nodejs_server.js" beforeDir="false" afterPath="$PROJECT_DIR$/nodejs_server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/manageCouch.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/require.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/doku/datenmodell/userExample.json" beforeDir="false" afterPath="$PROJECT_DIR$/doku/datenmodell/userExample.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,10 +48,13 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Web_Engineering/WebEng_Code" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data" />
     <property name="nodejs_package_manager_path" value="npm" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Administrator\OneDrive\Uni Cloud\Schemalose_Datenbanken\sdbs-couchproject\data" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Administrator\OneDrive\Uni Cloud\Schemalose_Datenbanken\sdbs-couchproject\public\js" />
       <recent name="C:\Users\Administrator\OneDrive\Uni Cloud\Schemalose_Datenbanken\sdbs-couchproject" />
@@ -73,7 +73,7 @@
       <workItem from="1609947310229" duration="5860000" />
       <workItem from="1610111426484" duration="2559000" />
       <workItem from="1610367048017" duration="610000" />
-      <workItem from="1610533174217" duration="7066000" />
+      <workItem from="1610533174217" duration="8438000" />
     </task>
     <servers />
   </component>

@@ -1,0 +1,42 @@
+{
+    "type": "user",
+    "name": "Franziska",
+    "surname": "Kuesters",
+    "registration_date": "01.05.2020",
+    "password": "example",
+    "email": "fk@gmx.de",
+    "workfield": "information technology",
+    "certificates": [{
+      "id": "ciscnet1",
+      "skillfield": "information technology",
+      "name": "cisco network certificate",
+      "level": 1,
+      "issued": "01.01.2012",
+      "exceeds": "01.01.2030",
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de"
+    }, {
+      "id": "contr4167",
+      "skillfield": "Business Administration",
+      "name": "IT Controlling Certificate",
+      "level": 1,
+      "issued": "01.03.2018",
+      "exceeds": "01.03.2038",
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de"
+    },{
+      "id": "cert5000",
+      "skillfield": "Business Administration",
+      "name": "Business Law",
+      "level": 1,
+      "issued": "01.09.2017",
+      "exceeds": "01.09.2999",
+      "company": "Example Gmbh",
+      "registration_date": "01.01.2010",
+      "contact": "mueller@example-gmbh.de"
+    }]
+}
+
+
