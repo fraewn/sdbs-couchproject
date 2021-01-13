@@ -1,33 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <style>
+        .body {
+            font-family: Verdana;
+
+        }
+        h1 {
+            color: blue;
+        }
+        h2 {
+            color: dodgerblue;
+        }
+        form {
+            border-width: 2px;
+            border-style: solid;
+            border-color: dodgerblue;
+            background-color: lightblue;
+        }
+    </style>
     <meta charset="UTF-8">
-    <title>Profile | Zert24</title>
+    <title>Profile | Cert24</title>
 </head>
 <body>
-<h1> View and change your profile information here </h1>
+<h1> Welcome to Cert24 - Your reliable certificate collection service</h1>
+<h2> View and change your profile information here </h2>
     <form action="/form" method="post">
+        <br><br>
         <label>First name:</label>
         <input type="text" id="name" name="name"><br><br>
         <label>Last name:</label>
         <input type="text" id="surname" name="surname"><br><br>
 
         <label for="password">Password:</label>
-        <input type="text" id="password" name="password" value="Doe"><br><br>
+        <input type="text" id="password" name="password"><br><br>
 
         <label for="email">Email:</label>
-        <input type="text" id="email" name="email" value="Doe"><br><br>
+        <input type="text" id="email" name="email"><br><br>
 
         <label for="workfield">Workfield:*</label>
         <input type="text" id="workfield" name="workfield" value="e.g. IT"><br><br>
 
         <label for="registration_date">Regristration Date:</label>
         <label type="text" id="registration_date" name="registration_date" >01.01.2020</label><br><br>
-        <input type="submit" value="Submit"><br>
+        <input type="submit" value="Submit"><br><br>
+        <p> *Entry is optional</p><br><br>
       </form>
-    <p> *Entry is optional</p>
+
       
 </body>
-<h1>View your certificates</h1>
+<!--<h1>View your certificates</h1>-->
 
 </html>
