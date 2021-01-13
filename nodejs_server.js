@@ -1,9 +1,26 @@
-const express = require('express');
-const http = require('http')
-const cors = require('cors');
+var express = require('express');
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var upload = multer();
+var app = express();
+
 const path = require('path')
 const fs = require('fs');
 const ini = require('ini');
+
+
+// for parsing application/json
+app.use(bodyParser.json()); 
+
+// for parsing application/xwww-
+app.use(bodyParser.urlencoded({ extended: true })); 
+//form-urlencoded
+
+// for parsing multipart/form-data
+app.use(upload.array()); 
+app.use(express.static('public'));
+
+
 
 const config = ini.parse(fs.readFileSync('./configuration.ini', 'utf-8'))
 const username = config.remote.user;
@@ -11,15 +28,8 @@ const password = config.remote.password;
 const host = config.remote.host;
 const port = config.remote.port;
 
-const app = express();
-
-app.use(express.static(path.join(__dirname, 'public')))
-
-//add other middleware
-app.use(cors());
-
 //start app 
-const local_port = 3131;
+const local_port = 3122;
 
 app.listen(local_port, () =>
   console.log(`App is listening on port ${local_port}.`)
@@ -27,11 +37,8 @@ app.listen(local_port, () =>
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, './public/index.html'))
-})
+});
 
-app.listen(port, () => {
-  console.log('Example app listening at http://localhost:${port}')
-})
 
 
 // database operations
@@ -57,6 +64,15 @@ async function asyncCall() {
 
 asyncCall();
 
+
+app.post('/form', function(req, res){
+  console.log(req.body);
+  res.send("recieved your request!");
+
+  //TODO hier aus dem request den kram erstellen
+});
+
+
 app.get('/', async (req, res) => {
 
   http.get('http://' + username + ":" + password + "@" + host + ":" + port + "/_uuids", (resp) => {
@@ -78,10 +94,3 @@ app.get('/', async (req, res) => {
 
 //          res.send("hi");
 })
-
-
-
-
-
-
-
