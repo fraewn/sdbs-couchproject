@@ -20,8 +20,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(upload.array()); 
 app.use(express.static('public'));
 
-
-
 const config = ini.parse(fs.readFileSync('./configuration.ini', 'utf-8'))
 const username = config.remote.user;
 const password = config.remote.password;
@@ -54,28 +52,58 @@ const couch = require('nano')('http://' + username + ":" + password + "@" + host
 //console.log(err.toString());
 //});
 
-
+// set global database
 const certstore = couch.db.use('cert-store');
 
-async function asyncCall() {
+async function getDatabaseList() {
   const dblist = await couch.db.list();
   console.log(dblist.toString());
 }
-
-asyncCall();
-
+getDatabaseList();
 
 app.post('/form', function(req, res){
+  // inform user
   res.send("recieved your request!");
-  console.log(req.body);
-
-  const insertResponse = certstore.insert({_id: "test1", "type": "user", "name": req.body.name, "surname": req.body.surname,
-    "password": req.body.password, "email": req.body.email, "workfield": req.body.workfield}, (error, response) => {
-  })
-
-  console.log("Entry was saved in CouchDB.")
-
+  // log request
+  console.log("\nRecieved a request to store a new user.")
+  // generate uuid, use it to create a new user and log execution
+  getUuid()
+      .then(uuid => insertUser(uuid, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield))
+      .then(data => { console.log("Operation 'saving user in database' was executed. Response: "); console.log(data);});
 });
+
+async function insertUser(uuid, name, surname, password, email, workfield){
+  try {
+   return await certstore.insert({
+     _id: uuid, "type": "user", "name": name, "surname": surname,
+      "password": password, "email": email, "workfield": workfield
+    });
+  }
+  catch(error){
+    console.log("ERROR - while inserting a new User: " + error)
+  }
+  finally{
+    console.log("A new user, with id: " + uuid + " and full name: '" + name + " " + surname + "' was inserted.");
+  }
+}
+
+async function getUuid(){
+  try {
+      const uuidResult = await couch.uuids(1);
+      const uuid = uuidResult['uuids'][0];
+      return uuid;
+  }
+  catch(error){
+    console.log("ERROR - in getUuid() method: " + error);
+  }
+  finally{
+    console.log("A new uuid was generated.");
+  }
+}
+
+
+
+
 
 
 
