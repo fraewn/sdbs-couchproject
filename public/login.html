@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <style>
-        .body {
+        body {
             font-family: Verdana;
 
         }
@@ -17,13 +17,18 @@
             border-style: solid;
             border-color: dodgerblue;
             background-color: lightblue;
+            padding: 1em;
+        }
+        .links {
+            color: green;
+            font-weight: inherit;
         }
     </style>
     <meta charset="UTF-8">
     <title>Login</title>
 </head>
 <body>
-    <h1>Welcome to Cert24!</h1>
+    <h1> Welcome to Cert24 - Your reliable certificate collection service</h1>
     <h2>Please enter your login information down below</h2>
 
     <form action="/cert" method="post">
@@ -34,5 +39,8 @@
         <input type="text" id="password" name="password"><br><br>
         <input type="submit" value="Submit"><br><br>
     </form>
+
+    <h2>Don't have an account yet? </h2>
+    <a class=links href="index.html">Create a new Account here</a>
 </body>
 </html>

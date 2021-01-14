@@ -33,6 +33,12 @@ app.listen(local_port, () =>
   console.log(`App is listening on port ${local_port}.`)
 );
 
+// +++++++++++++++++ ROUTING +++++++++++++++++++++++++++++++++++++
+
+app.get('/', function(req, res) {
+  res.redirect("/login");
+});
+
 app.get('/login', function(req, res) {
   res.sendFile(path.join(__dirname, './public/login.html'))
 });
@@ -48,43 +54,49 @@ app.get('/certs', function(req, res) {
     let certificates = certs
     res.render("certs.ejs", {certificates: certificates});
   });
-
 });
 
-// database operations
-console.log("userhello" + username+ password + host + port);
-let globalUserId;
+app.get('/logout', function(req, res) {
+  console.log("\nUser with id '" + globalUserId + "' was logged out.");
+  globalUserId = null;
+  res.redirect("/login");
+});
 
-const couch = require('nano')('http://' + username + ":" + password + "@" + host + ":" + port)
+app.get('/delete', function(req, res) {
+  // TODO
+});
 
-
-// create database "cert-store"
-//const db = couch.db.create("cert-store", (err, data) => {
-//console.log(data.toString());
-//console.log(err.toString());
-//});
-
-// set global database
-const certstore = couch.db.use('cert-store');
-
-// check connection ;)
-async function getDatabaseList() {
-  const dblist = await couch.db.list();
-  console.log(dblist.toString());
-}
-getDatabaseList();
-
-// request to create a profile
+// +++++++++++++++ REQUESTS FROM HTML SUBMITS ++++++++++++++++++++++++++++++++++
+// request to create a profile (and update, but update does not work yet)
 // input: profile data for new profile
 app.post('/form', function(req, res){
   // inform user
   // res.send("received your request!");
   // log request
   console.log("\nReceived a request to store a new user.")
+
+  // user is new
   // generate uuid, use it to create a new user and log execution
-  getUuid()
-      .then(uuid => insertUser(uuid, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield))
-      .then(data => { console.log("Operation 'saving user in database' was executed. Response: "); console.log(data); res.sendFile(path.join(__dirname, './public/login.html'));});
+  if(globalUserId==null) {
+    getUuid()
+        .then(uuid => insertUser(uuid, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield))
+        .then(data => {
+          console.log("Stored new user in database. Response: ");
+          console.log(data);
+          res.sendFile(path.join(__dirname, './public/login.html'));
+        });
+  }
+  // user is already logged in
+  // update profile information
+  else{
+    // Info: es würde zu schweren Fehlern kommen, wenn User nicht alle Felder ausfüllen: Informationen würden in Parameter Reihenfolge zugewiesen werden
+    // z.B. kein surname --> password in der db in surname eingetragen
+    insertUser(globalUserId, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield).then(data => {
+      console.log("Updated user in database. Response: ");
+      console.log(data);
+      res.sendFile(path.join(__dirname, './public/login.html'));
+    });
+  }
 });
 
 // request for a login
@@ -106,6 +118,25 @@ app.post('/cert', function(req, res) {
 });
 
 
+// ++++++++++++++++++++++++ DATABASE OPERATIONS +++++++++++++++++++++++++++++++
+// use nano package for couchdb access
+const couch = require('nano')('http://' + username + ":" + password + "@" + host + ":" + port)
+// set global database
+const certstore = couch.db.use('cert-store');
+
+// print database access information
+console.log("userhello: " + username+ password + host + port);
+// check connection ;)
+async function getDatabaseList() {
+  const dblist = await couch.db.list();
+  console.log(dblist.toString());
+}
+getDatabaseList();
+
+// set global user id to null (no user logged in yet)
+let globalUserId = null;
+
+// ++++++++++++++++++++++++++++ Login +++++++++++++++++++++++++++++
 // find documents where the email and password match
 async function login(email, password){
   try {
@@ -143,19 +174,7 @@ function setGlobalUserId(receivedID){
   console.log("Global user id was set to: " + globalUserId);
 }
 
-async function getUuid(){
-  try {
-    const uuidResult = await couch.uuids(1);
-    const uuid = uuidResult['uuids'][0];
-    return uuid;
-  }
-  catch(error){
-    console.log("ERROR - in getUuid() method: " + error);
-  }
-  finally{
-    console.log("A new uuid was generated.");
-  }
-}
+// ++++++++++++++++++++++++++++ CRUD +++++++++++++++++++++++++++++++++++++++++++++++++
 
 async function insertUser(uuid, name, surname, password, email, workfield){
   try {
@@ -172,18 +191,64 @@ async function insertUser(uuid, name, surname, password, email, workfield){
   }
 }
 
-async function getCertificatesForAUser(id){
+// https://stackoverflow.com/questions/57477157/couchdb-update-handler-doc-update-insert-using-nano
+// https://docs.couchdb.org/en/1.6.1/couchapp/ddocs.html#updatefun
+// https://stackoverflow.com/questions/32237406/couchdb-update-document
+async function updateUser(id, rev, name, surname, password, email, workfield){
+  try {
+    return await certstore.insert({
+      _id: id, _rev: rev, "type": "user", "name": name, "surname": surname,
+      "password": password, "email": email, "workfield": workfield
+    });
+  }
+  catch(error){
+    console.log("ERROR - happened during updateUser method: " + error);
+  }
+  finally {
+    console.log("User with id '" + globalUserId + "' was updated successfully")
+  }
+
+}
+
+// Test für update von max mustermann
+/*getRev('cdf60a921351af78780a7c4efc003094').then(rev => {
+  updateUser('cdf60a921351af78780a7c4efc003094', rev, "Timo","Mustermann", "example", "max.mustermann@gmx.de", "IT").then(response => console.log(response));
+})*/
+
+async function deleteUser(id){
+  const response = await certstore.destroy(id)
+}
+
+
+
+// ++++++++++++++++++ HELPER FUNCTIONS ++++++++++++++++++++++++++++++
+async function getUuid(){
+  try {
+    const uuidResult = await couch.uuids(1);
+    const uuid = uuidResult['uuids'][0];
+    return uuid;
+  }
+  catch(error){
+    console.log("ERROR - in getUuid() method: " + error);
+  }
+  finally{
+    console.log("A new uuid was generated.");
+  }
+}
+
+async function getRev(id){
+  const doc = await certstore.head(id);
+  // Achtung, das wird mit "" drum rum zurück gegeben! die müssen noch abgeschnitten werden
+  // alternativ kann man auch das komplette doc mit der rev abfragen das ist dann doc._rev einfach
+  console.log(doc.etag);
+  return doc._rev;
+}
+
+async function getCertificatesForAUser(id) {
   const doc = await certstore.get(id)
   const certs = doc.certificates;
   return certs;
 }
-
-//getCertificatesForAUser('cdf60a921351af78780a7c4efc003094');
-/*const certs = getCertificatesForAUser('cdf60a921351af78780a7c4efc003094').then(certs => {
-  //console.log(certs);
-  certs.forEach(readCert)
-});*/
-
 
 /*function readCert(cert){
   const certId = cert.id;
@@ -198,24 +263,4 @@ async function getCertificatesForAUser(id){
   console.log(certId, certSkillfield, certName, certIssued, certExceeds, certLevel, certCompany, certRegristrationDate, certContact);
 }*/
 
-app.get('/', async (req, res) => {
 
-  http.get('http://' + username + ":" + password + "@" + host + ":" + port + "/_uuids", (resp) => {
-    let data = '';
-
-    // A chunk of data has been recieved.
-    resp.on('data', (chunk) => {
-      data += chunk;
-    });
-
-    resp.on('end', () => {
-      console.log(data);
-      res.send(data);
-    });
-
-  }).on("error", (err) => {
-    console.log("Error: " + err.message);
-  });
-
-//          res.send("hi");
-})
