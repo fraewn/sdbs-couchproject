@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .body {
+            font-family: Verdana;
+
+        }
+        h1 {
+            color: blue;
+        }
+        h2 {
+            color: dodgerblue;
+        }
+        form {
+            border-width: 2px;
+            border-style: solid;
+            border-color: dodgerblue;
+            background-color: lightblue;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <h1>Welcome to Cert24!</h1>
+    <h2>Please enter your login information down below</h2>
+
+    <form action="/cert" method="post">
+        <br><br>
+        <label>Your email adress:</label>
+        <input type="text" id="email" name="email"><br><br>
+        <label for="password">Your password:</label>
+        <input type="text" id="password" name="password"><br><br>
+        <input type="submit" value="Submit"><br><br>
+    </form>
+</body>
+</html>

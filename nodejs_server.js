@@ -33,15 +33,17 @@ app.listen(local_port, () =>
   console.log(`App is listening on port ${local_port}.`)
 );
 
-app.get('/', function(req, res) {
+app.get('/login', function(req, res) {
+  res.sendFile(path.join(__dirname, './public/login.html'))
+});
+
+app.get('/register', function(req, res) {
   res.sendFile(path.join(__dirname, './public/index.html'))
 });
 
-
-
 // database operations
-
 console.log("userhello" + username+ password + host + port);
+let _id;
 
 const couch = require('nano')('http://' + username + ":" + password + "@" + host + ":" + port)
 
@@ -55,12 +57,15 @@ const couch = require('nano')('http://' + username + ":" + password + "@" + host
 // set global database
 const certstore = couch.db.use('cert-store');
 
+// check connecetion
 async function getDatabaseList() {
   const dblist = await couch.db.list();
   console.log(dblist.toString());
 }
 getDatabaseList();
 
+// create profile request
+// input: profile data for new profile
 app.post('/form', function(req, res){
   // inform user
   res.send("recieved your request!");
@@ -71,6 +76,79 @@ app.post('/form', function(req, res){
       .then(uuid => insertUser(uuid, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield))
       .then(data => { console.log("Operation 'saving user in database' was executed. Response: "); console.log(data);});
 });
+
+// show certificates request
+// input profile id
+
+
+// login
+// input email, password
+app.post('/cert', function(req, res) {
+  // log request
+  console.log("\nReceived a login request for email: " + req.body.email)
+  // execute login
+  login(req.body.email, req.body.password).then(loginRes => {
+    if (loginRes==true){
+      // if logged in successfully, navigate to cert page
+      res.sendFile(path.join(__dirname, './public/index.html'));
+    }
+    else{
+      // if login failed, navigate back to login page
+      res.sendFile(path.join(__dirname, './public/login.html'));
+    }
+  });
+});
+
+// find documents where the email and password match
+async function login(email, password){
+  try {
+    // define mango query to find a password and id for a given email address
+    const query = {
+      selector: {
+        email: {"$eq": email}
+      },
+      fields: ["password", "_id"],
+      limit: 2
+    };
+
+    // execute query
+    const docResult = await certstore.find(query);
+    // store results in variables
+    const receivedPassword = docResult['docs'][0].password;
+    const receivedId = docResult['docs'][0]._id;
+
+    // set global user id
+    setGlobalUserId(receivedId);
+
+    // return if given password and received password for this email address are the same
+    return (receivedPassword === password);
+  }
+  catch(error){
+    console.log("ERROR - happened during login method: " + error)
+  }
+  finally{
+    console.log("User with email '" + email + "'was logged in successfully");
+  }
+}
+
+function setGlobalUserId(receivedID){
+  this._id = receivedID;
+  console.log("Global user id was set to: " + this._id);
+}
+
+async function getUuid(){
+  try {
+    const uuidResult = await couch.uuids(1);
+    const uuid = uuidResult['uuids'][0];
+    return uuid;
+  }
+  catch(error){
+    console.log("ERROR - in getUuid() method: " + error);
+  }
+  finally{
+    console.log("A new uuid was generated.");
+  }
+}
 
 async function insertUser(uuid, name, surname, password, email, workfield){
   try {
@@ -86,23 +164,6 @@ async function insertUser(uuid, name, surname, password, email, workfield){
     console.log("A new user, with id: " + uuid + " and full name: '" + name + " " + surname + "' was inserted.");
   }
 }
-
-async function getUuid(){
-  try {
-      const uuidResult = await couch.uuids(1);
-      const uuid = uuidResult['uuids'][0];
-      return uuid;
-  }
-  catch(error){
-    console.log("ERROR - in getUuid() method: " + error);
-  }
-  finally{
-    console.log("A new uuid was generated.");
-  }
-}
-
-
-
 
 
 
