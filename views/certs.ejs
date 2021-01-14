@@ -1,0 +1,11 @@
+<h1>View your certificates here:</h1>
+<% for(var i=0; i<certificates.length; i++){ %>
+    <h2><%= i + ". " + certificates[i].name %></h2>
+    <p>Issued: <%= certificates[i].issued %></p>
+    <p>Exceeds: <%= certificates[i].exceeds %></p>
+    <p>Level: <%= certificates[i].level %></p>
+    <p>Skillfield: <%= certificates[i].skillfield %></p>
+    <p>Issued by: <%= certificates[i].company %></p>
+    <p>Contact information: <%= certificates[i].contact %></p><br>
+<% } %>
+

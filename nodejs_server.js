@@ -41,9 +41,19 @@ app.get('/register', function(req, res) {
   res.sendFile(path.join(__dirname, './public/index.html'))
 });
 
+app.get('/certs', function(req, res) {
+  console.log("This id was used to look up certs: " + globalUserId);
+  getCertificatesForAUser(globalUserId).then(certs => {
+    //console.log(certs);
+    let certificates = certs
+    res.render("certs.ejs", {certificates: certificates});
+  });
+
+});
+
 // database operations
 console.log("userhello" + username+ password + host + port);
-let _id;
+let globalUserId;
 
 const couch = require('nano')('http://' + username + ":" + password + "@" + host + ":" + port)
 
@@ -57,32 +67,28 @@ const couch = require('nano')('http://' + username + ":" + password + "@" + host
 // set global database
 const certstore = couch.db.use('cert-store');
 
-// check connecetion
+// check connection ;)
 async function getDatabaseList() {
   const dblist = await couch.db.list();
   console.log(dblist.toString());
 }
 getDatabaseList();
 
-// create profile request
+// request to create a profile
 // input: profile data for new profile
 app.post('/form', function(req, res){
   // inform user
-  res.send("recieved your request!");
+  // res.send("received your request!");
   // log request
-  console.log("\nRecieved a request to store a new user.")
+  console.log("\nReceived a request to store a new user.")
   // generate uuid, use it to create a new user and log execution
   getUuid()
       .then(uuid => insertUser(uuid, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield))
-      .then(data => { console.log("Operation 'saving user in database' was executed. Response: "); console.log(data);});
+      .then(data => { console.log("Operation 'saving user in database' was executed. Response: "); console.log(data); res.sendFile(path.join(__dirname, './public/login.html'));});
 });
 
-// show certificates request
-// input profile id
-
-
-// login
-// input email, password
+// request for a login
+// input: email, password
 app.post('/cert', function(req, res) {
   // log request
   console.log("\nReceived a login request for email: " + req.body.email)
@@ -90,7 +96,7 @@ app.post('/cert', function(req, res) {
   login(req.body.email, req.body.password).then(loginRes => {
     if (loginRes==true){
       // if logged in successfully, navigate to cert page
-      res.sendFile(path.join(__dirname, './public/index.html'));
+      res.redirect("/certs");
     }
     else{
       // if login failed, navigate back to login page
@@ -98,6 +104,7 @@ app.post('/cert', function(req, res) {
     }
   });
 });
+
 
 // find documents where the email and password match
 async function login(email, password){
@@ -132,8 +139,8 @@ async function login(email, password){
 }
 
 function setGlobalUserId(receivedID){
-  this._id = receivedID;
-  console.log("Global user id was set to: " + this._id);
+  globalUserId = receivedID;
+  console.log("Global user id was set to: " + globalUserId);
 }
 
 async function getUuid(){
@@ -165,8 +172,31 @@ async function insertUser(uuid, name, surname, password, email, workfield){
   }
 }
 
+async function getCertificatesForAUser(id){
+  const doc = await certstore.get(id)
+  const certs = doc.certificates;
+  return certs;
+}
+
+//getCertificatesForAUser('cdf60a921351af78780a7c4efc003094');
+/*const certs = getCertificatesForAUser('cdf60a921351af78780a7c4efc003094').then(certs => {
+  //console.log(certs);
+  certs.forEach(readCert)
+});*/
 
 
+/*function readCert(cert){
+  const certId = cert.id;
+  const certName = cert.name;
+  const certSkillfield = cert.skillfield;
+  const certLevel = cert.level;
+  const certIssued = cert.issued;
+  const certExceeds = cert.exceeds;
+  const certCompany = cert.company;
+  const certRegristrationDate = cert.registration_date;
+  const certContact = cert.contact;
+  console.log(certId, certSkillfield, certName, certIssued, certExceeds, certLevel, certCompany, certRegristrationDate, certContact);
+}*/
 
 app.get('/', async (req, res) => {
 
