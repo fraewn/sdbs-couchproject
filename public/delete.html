@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            font-family: Verdana;
+        }
+        h1 {
+            color: blue;
+        }
+        h2 {
+            color: dodgerblue;
+        }
+        form {
+            border-width: 2px;
+            border-style: solid;
+            border-color: dodgerblue;
+            background-color: lightblue;
+            padding-left: 1em;
+            padding-bottom: 0.5em;
+            padding-top: 1em;
+            padding-right: 1em;
+            display: inline-block;
+        }
+        input {
+            margin-right: 1em;
+        }
+        .links {
+            color: green;
+            font-weight: inherit;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Delete profile</title>
+    <h2> Are you sure you want to delete your profile?</h2>
+    <form action="/bye" method="post">
+       <input type="submit" value="Yes"> <a class=links href="/certs"> No, I want to go to the main page</a>
+    </form><br>
+
+</head>
+<body>
+
+</body>
+</html>
