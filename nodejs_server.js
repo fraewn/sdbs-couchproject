@@ -90,12 +90,14 @@ app.post('/form', function(req, res){
   // update profile information
   else{
     // Info: es würde zu schweren Fehlern kommen, wenn User nicht alle Felder ausfüllen: Informationen würden in Parameter Reihenfolge zugewiesen werden
-    // z.B. kein surname --> password in der db in surname eingetragen
-    insertUser(globalUserId, req.body.name, req.body.surname, req.body.password, req.body.email, req.body.workfield).then(data => {
-      console.log("Updated user in database. Response: ");
-      console.log(data);
-      res.sendFile(path.join(__dirname, './public/login.html'));
-    });
+    // z.B. kein surname --> password in der db wird in surname eingetragen
+    getUser(globalUserId).then(doc => {
+      console.log(doc);
+      updateUser(doc, req.body.name,req.body.surname, req.body.password, req.body.email, req.body.workfield).then(data => {
+        console.log("Updated user in database. Response: ");
+        console.log(data);
+      });
+    })
   }
 });
 
@@ -137,7 +139,7 @@ getDatabaseList();
 let globalUserId = null;
 
 // ++++++++++++++++++++++++++++ Login +++++++++++++++++++++++++++++
-// find documents where the email and password match
+// find all documents with this email and look if password matches one of them
 async function login(email, password){
   try {
     // define mango query to find a password and id for a given email address
@@ -194,26 +196,51 @@ async function insertUser(uuid, name, surname, password, email, workfield){
 // https://stackoverflow.com/questions/57477157/couchdb-update-handler-doc-update-insert-using-nano
 // https://docs.couchdb.org/en/1.6.1/couchapp/ddocs.html#updatefun
 // https://stackoverflow.com/questions/32237406/couchdb-update-document
-async function updateUser(id, rev, name, surname, password, email, workfield){
+async function updateUser(doc, name, surname, password, email, workfield){
+  let errorHappened = false;
   try {
-    return await certstore.insert({
-      _id: id, _rev: rev, "type": "user", "name": name, "surname": surname,
-      "password": password, "email": email, "workfield": workfield
-    });
+    // store document in application logic
+    let _id = doc['_id'];
+    let _rev = doc['_rev'];
+    let type = doc['type'];
+    let certificates = doc['certificates'];
+    let updatedName = doc['name'];
+    let updatedSurname = doc['surname'];
+    let updatedPassword = doc['password'];
+    let updatedEmail = doc['email'];
+    let updatedWorkfield = doc['workfield'];
+
+    // if parameter is not empty, overwrite its value in application logic
+    if(!(name === "")){
+      updatedName = name;
+    }
+    if(!(surname === "")){
+      updatedSurname = surname;
+    }
+    if(!(password === "")){
+      updatedPassword = password;
+    }
+    if(!(email === "")){
+      updatedEmail = email;
+    }
+    if(!(workfield === "")){
+      updatedWorkfield = workfield;
+    }
+
+    // update document with values from application logic
+    return await certstore.insert({_id: _id, _rev: _rev, "type": type, "name": updatedName, "surname": updatedSurname,
+      "password": updatedPassword, "email": updatedEmail, "workfield": updatedWorkfield, "certificates": certificates});
   }
-  catch(error){
-    console.log("ERROR - happened during updateUser method: " + error);
+  catch(errorMessage){
+    errorHappened = true;
+    console.log("ERROR - happened during updateUser method: " + errorMessage);
   }
   finally {
-    console.log("User with id '" + globalUserId + "' was updated successfully")
+    if(!errorHappened) {
+      console.log("User with id '" + globalUserId + "' was updated successfully")
+    }
   }
-
 }
-
-// Test für update von max mustermann
-/*getRev('cdf60a921351af78780a7c4efc003094').then(rev => {
-  updateUser('cdf60a921351af78780a7c4efc003094', rev, "Timo","Mustermann", "example", "max.mustermann@gmx.de", "IT").then(response => console.log(response));
-})*/
 
 async function deleteUser(id){
   const response = await certstore.destroy(id)
@@ -238,7 +265,7 @@ async function getUuid(){
 
 async function getRev(id){
   const doc = await certstore.head(id);
-  // Achtung, das wird mit "" drum rum zurück gegeben! die müssen noch abgeschnitten werden
+  // Achtung, die rev wird mit "" drum rum zurück gegeben! die müssen noch abgeschnitten werden
   // alternativ kann man auch das komplette doc mit der rev abfragen das ist dann doc._rev einfach
   console.log(doc.etag);
   return doc._rev;
@@ -248,6 +275,11 @@ async function getCertificatesForAUser(id) {
   const doc = await certstore.get(id)
   const certs = doc.certificates;
   return certs;
+}
+
+async function getUser(id){
+  const doc = await certstore.get(id)
+  return doc;
 }
 
 /*function readCert(cert){
