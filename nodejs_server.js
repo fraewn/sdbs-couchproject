@@ -116,7 +116,7 @@ app.post('/cert', function(req, res) {
       }
     });
   }else{ //use view login
-    view_request = 'http://admin:admin@10.20.110.39:5984/testdatabase_v2/_design/user/_view/login?key="' + req.body.email + '"&value="' + req.body.password +'"';
+    view_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + '/_design/user/_view/login?key="' + req.body.email + '"&value="' + req.body.password +'"';
     console.log("view login request: " + view_request);
     http.get(view_request, (resp) => {
       let data = '';
