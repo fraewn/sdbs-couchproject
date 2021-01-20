@@ -135,7 +135,7 @@ const couch = require('nano')('http://' + username + ":" + password + "@" + host
 const certstore = couch.db.use(database);
 
 // log database access information
-console.log("userhello: " + username + password + host + port);
+console.log("userhello: " + username + ":" + password + "@"+ host + ":"+ port + " " + database);
 // check connection ;)
 async function getDatabaseList() {
   const dblist = await couch.db.list();
@@ -162,6 +162,7 @@ async function login(email, password){
 
     // execute query
     const docResult = await certstore.find(query);
+
     // store results in variables
     const receivedPassword = docResult['docs'][0].password;
     const receivedId = docResult['docs'][0]._id;
@@ -277,9 +278,14 @@ async function deleteUser(id, rev){
 
 // READ
 async function getUser(id){
+  try {
   const doc = await certstore.get(id)
   console.log(doc);
   return doc;
+  }
+  catch(errorMessage){
+    console.log("ERROR - happened during getUser(" + id +") method: " + errorMessage + "\n");
+  }
 }
 async function getCertificatesForAUser(id) {
   const doc = await certstore.get(id)
@@ -287,7 +293,7 @@ async function getCertificatesForAUser(id) {
   return certs;
 }
 
-getUser('abc');
+//getUser('028f56ee0f8581ccaf35581f81001ac3');
 
 
 // ++++++++++++++++++ HELPER FUNCTIONS ++++++++++++++++++++++++++++++
