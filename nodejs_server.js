@@ -25,6 +25,7 @@ const username = config.remote.user;
 const password = config.remote.password;
 const host = config.remote.host;
 const port = config.remote.port;
+const database = config.remote.database;
 
 //start app 
 const local_port = 3122;
@@ -131,7 +132,7 @@ app.post('/bye', function (req, res){
 // use nano package for couchdb access
 const couch = require('nano')('http://' + username + ":" + password + "@" + host + ":" + port)
 // set global database
-const certstore = couch.db.use('cert-store');
+const certstore = couch.db.use(database);
 
 // log database access information
 console.log("userhello: " + username + password + host + port);
