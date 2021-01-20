@@ -191,7 +191,7 @@ function setGlobalUserId(receivedID){
 
 // CREATE
 async function insertUser(uuid, name, surname, password, email, workfield){
-  let errorHappened = false;
+  let errorHappened = false;git
   try {
    return await certstore.insert({
      _id: uuid, "type": "user", "name": name, "surname": surname,
@@ -277,6 +277,7 @@ async function deleteUser(id, rev){
 // READ
 async function getUser(id){
   const doc = await certstore.get(id)
+  console.log(doc);
   return doc;
 }
 async function getCertificatesForAUser(id) {
@@ -284,6 +285,8 @@ async function getCertificatesForAUser(id) {
   const certs = doc.certificates;
   return certs;
 }
+
+getUser('abc');
 
 
 // ++++++++++++++++++ HELPER FUNCTIONS ++++++++++++++++++++++++++++++
