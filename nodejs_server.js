@@ -1,3 +1,4 @@
+const http = require('http')
 var express = require('express');
 var bodyParser = require('body-parser');
 var multer = require('multer');
@@ -102,17 +103,40 @@ app.post('/form', function(req, res){
 app.post('/cert', function(req, res) {
   // log request
   console.log("\nReceived a login request for email: " + req.body.email)
-  // execute login
-  login(req.body.email, req.body.password).then(loginRes => {
-    if (loginRes==true){
-      // if logged in successfully, navigate to cert page
-      res.redirect("/certs");
-    }
-    else{
-      // if login failed, navigate back to login page
-      res.sendFile(path.join(__dirname, './public/login.html'));
-    }
-  });
+  if (req.body.view != "on"){
+    // execute login
+    login(req.body.email, req.body.password).then(loginRes => {
+      if (loginRes==true){
+        // if logged in successfully, navigate to cert page
+        res.redirect("/certs");
+      }
+      else{
+        // if login failed, navigate back to login page
+        res.sendFile(path.join(__dirname, './public/login.html'));
+      }
+    });
+  }else{ //use view login
+    view_request = 'http://admin:admin@10.20.110.39:5984/testdatabase_v2/_design/user/_view/login?key="' + req.body.email + '"&value="' + req.body.password +'"';
+    console.log("view login request: " + view_request);
+    http.get(view_request, (resp) => {
+      let data = '';
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+      resp.on('end', () => {
+        parsed_response = JSON.parse(data);
+     
+        if (parsed_response["rows"].length == 1){    //did we find the user + password?
+          setGlobalUserId(parsed_response["rows"][0]["id"]);
+          res.redirect("/certs");
+        }else {
+          res.sendFile(path.join(__dirname, './public/login.html'));
+        }
+      });
+    });
+  }
+      
+
 });
 
 // request for delete profile
@@ -183,6 +207,8 @@ async function login(email, password){
     }
   }
 }
+
+
 
 function setGlobalUserId(receivedID){
   globalUserId = receivedID;
