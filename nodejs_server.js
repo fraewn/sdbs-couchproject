@@ -118,15 +118,25 @@ app.post('/cert', function(req, res) {
   }else{ //use view login
     view_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + '/_design/user/_view/login?key="' + req.body.email + '"&value="' + req.body.password +'"';
     console.log("view login request: " + view_request);
+    var query_start = new Date();
     http.get(view_request, (resp) => {
       let data = '';
       resp.on('data', (chunk) => {
         data += chunk;
       });
       resp.on('end', () => {
+        var query_end = new Date() - query_start;
+        console.log("View Login too: " + query_end + "ms");
         parsed_response = JSON.parse(data);
-     
-        if (parsed_response["rows"].length == 1){    //did we find the user + password?
+        console.log("Parsed Response: " + JSON.stringify(parsed_response));
+        console.log("rows: " + parsed_response["rows"]);
+        var success = false;
+        for (var i = 0; i < parsed_response["rows"].length; i++){
+          if(parsed_response["rows"][i]["value"] == req.body.password){
+            success = true;
+          }
+        }
+        if (success){    //did we find the user + password?
           setGlobalUserId(parsed_response["rows"][0]["id"]);
           res.redirect("/certs");
         }else {
@@ -185,7 +195,10 @@ async function login(email, password){
     };
 
     // execute query
+    var query_start = new Date();
     const docResult = await certstore.find(query);
+    var query_end = new Date() - query_start;
+    console.log("Mango Login too: " + query_end + "ms");
 
     // store results in variables
     const receivedPassword = docResult['docs'][0].password;
