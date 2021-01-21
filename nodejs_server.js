@@ -3,10 +3,13 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
 var app = express();
+const https = require('http')
 const request = require("request");
 const path = require('path')
 const fs = require('fs');
 const ini = require('ini');
+const { hostname } = require('os');
+const querystring = require('querystring');
 
 
 // for parsing application/json
@@ -27,12 +30,80 @@ const host = config.remote.host;
 const port = config.remote.port;
 const database = config.remote.database;
 
+const document_by_id_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + "/";
+
 //start app 
 const local_port = 3122;
 
 app.listen(local_port, () =>
   console.log(`App is listening on port ${local_port}.`)
 );
+
+// +++++++++++++++++ Utility +++++++++++++++++++++++++++++++++++++
+function doRequest(targeturl, http_method = "GET", return_json = false, request_sends_json = false) {
+
+  console.log("doRequest: " + targeturl + " " + http_method + " " + return_json + " " + request_sends_json);
+  let options = {};
+  if (request_sends_json){
+    options = {
+      url: targeturl,
+      method: http_method,
+      json: true
+    }
+  }else{
+    options = {
+      url: targeturl,
+      method: http_method,
+    }
+  }
+
+  return new Promise(function (resolve, reject) {
+    request(options, function (error, res, body) {
+      if (!error && res.statusCode == 200) {
+        if (return_json)
+        {
+          resolve(JSON.parse(body));
+        }else {
+          resolve(body);
+        }
+      } else {
+        console.log("rejected error: " + error);
+        reject(error);
+      }
+    });
+  }).catch(console.log);
+}
+
+function update_doc(host,port, username, password, pathname, doc){
+  const data = JSON.stringify(doc);
+  const options = {
+    port: port,
+    hostname: host,
+    path: pathname,
+    method: 'PUT',
+    auth : username + ":" + password,
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': data.length
+    }
+  }
+  
+  const req = https.request(options, res => {
+    console.log(`statusCode: ${res.statusCode}`)
+  
+    res.on('data', d => {
+      process.stdout.write(d)
+    })
+  })
+  
+  req.on('error', error => {
+    console.error(error)
+  })
+  
+  req.write(data)
+  req.end()
+  console.log("request ended");
+}
 
 // +++++++++++++++++ ROUTING +++++++++++++++++++++++++++++++++++++
 
@@ -60,8 +131,59 @@ app.get('/certs', function(req, res) {
 
 app.get('/staff', function(req, res) {
   console.log("Looking up all different certs");
-  let returned_certs = GetAllAvailableCerts();
-  res.render("staff.ejs", {returned_certs: returned_certs});
+  let certificates_request = document_by_id_request+ "certificate_ids";
+  let certificates = []
+
+  doRequest(certificates_request, "GET", false).then(certs => { console.log("certs: " + certs)
+    certs_json = JSON.parse(certs);
+    let promises = [];
+    for (let i = 0; i < certs_json["cert_ids"].length; i++){
+      promises.push(doRequest(document_by_id_request + certs_json["cert_ids"][i], "GET",  true));
+    }
+    Promise.all(promises).then((returned_certs) => {   
+      //console.log("json " + JSON.stringify(returned_certs, null, 4))
+      res.render("staff.ejs", {returned_certs, returned_certs}) 
+    });
+  });
+
+});
+
+app.post('/staff', function(req, res) {
+  console.log("POST request to /staff)");
+  let contact_to_change_id = req.body.certificate_id;
+  let new_mail = req.body.email;
+  console.log("Changing certificate: " + contact_to_change_id);
+  console.log("New contact mail: " + new_mail);
+
+
+  //get_doc(host, port, username, password, "/" + database + "/" + contact_to_change_id ;)
+  //update cert (at central point)
+  doRequest(document_by_id_request + contact_to_change_id, "GET", true).then(doc_json =>{
+    doc_json["contact"] = new_mail;
+    console.log(doc_json);
+    let update_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + "/";
+    let hostname = "www." + username + ":" + password + "@"+ host;
+    let pathname = "/" + database + "/" + contact_to_change_id;
+    let update_contact_request = update_request + contact_to_change_id + " -d '" +  JSON.stringify(doc_json) + "'";
+    //console.log("strigified JSON" + JSON.stringify(doc_json));
+    console.log("update_contact_request: " + update_contact_request);
+
+    update_doc(host, port,  username, password, pathname, doc_json);
+
+    console.log("redirecting to staff");
+    res.redirect("/staff");
+
+
+    //doRequest(update_contact_request, "PUT", true, true).then((updated_doc) => {
+   //   console.log("Updated doc: " + updated_doc);
+    //});
+  });
+
+
+
+  //update cert in all users
+  //use mango..
+
 });
 
 
@@ -125,12 +247,12 @@ app.post('/cert', function(req, res) {
   }else{ //use view login
     view_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + '/_design/user/_view/login?key="' + req.body.email + '"&value="' + req.body.password +'"';
     console.log("view login request: " + view_request);
-    var query_start = new Date();
+    let query_start = new Date();
 
     request.get(view_request, (error, response, body) => {
       let json = JSON.parse(body);
       console.log("view request is: " +  JSON.stringify(json));
-      var query_end = new Date() - query_start;
+      let query_end = new Date() - query_start;
       console.log("View Login too: " + query_end + "ms");
       for (var i = 0; i < json["rows"].length; i++){
         if(json["rows"][i]["value"] == req.body.password){
@@ -143,36 +265,8 @@ app.post('/cert', function(req, res) {
       }else {
         res.sendFile(path.join(__dirname, './public/login.html'));
       }
-  });
-    /*
-    http.get(view_request, (resp) => {
-      let data = '';
-      resp.on('data', (chunk) => {
-        data += chunk;
-      });
-      resp.on('end', () => {
-        var query_end = new Date() - query_start;
-        console.log("View Login too: " + query_end + "ms");
-        parsed_response = JSON.parse(data);
-        console.log("Parsed Response: " + JSON.stringify(parsed_response));
-        console.log("rows: " + parsed_response["rows"]);
-        var success = false;
-        for (var i = 0; i < parsed_response["rows"].length; i++){
-          if(parsed_response["rows"][i]["value"] == req.body.password){
-            success = true;
-          }
-        }
-        if (success){    //did we find the user + password?
-          setGlobalUserId(parsed_response["rows"][0]["id"]);
-          res.redirect("/certs");
-        }else {
-          res.sendFile(path.join(__dirname, './public/login.html'));
-        }
-      });
-    });*/
-  }
-      
-
+    });
+   }
 });
 
 // request for delete profile
@@ -358,44 +452,6 @@ async function getCertificatesForAUser(id) {
   return certs;
 }
 
-/*
-function GetAllAvailableCerts(){
-  let document_by_id_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + "/";
-  let certificates_request = document_by_id_request+ "certificate_ids";
-  let certificates = []
-  http.get(certificates_request, (resp) => {
-    let data = '';
-    resp.on('data', (chunk) => {
-      data += chunk;
-    });
-    resp.on('end', () => {
-      parsed_response = JSON.parse(data);
-      console.log("Parsed certificates_request Response: " + JSON.stringify(parsed_response));
-
-      for (var i = 0; i < parsed_response["cert_ids"].length; i++){
-          http.get(certificates_request, (resp) => {
-          let data = '';
-          resp.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          resp.on('end', () => {
-            certificates.push(JSON.parse(data));
-          });
-        });
-      }
-      //if (success){    //did we find the user + password?
-      // setGlobalUserId(parsed_response["rows"][0]["id"]);
-      //  res.redirect("/certs");
-      //}else {
-      //  res.sendFile(path.join(__dirname, './public/login.html'));
-      //}
-    });
-  });
-  console.log("All certs: " + certificates);
-  return certificates;
-}
-*/
 
 //getUser('028f56ee0f8581ccaf35581f81001ac3');
 

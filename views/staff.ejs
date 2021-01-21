@@ -47,19 +47,20 @@
     </ul>
 </nav>
 
-<h1>View your certificates here:</h1>
+<h1>Staff view of all certificates:</h1>
 <% for(var i=0; i<returned_certs.length; i++){ %>
     <h2><%= i + ". " + returned_certs[i].name %></h2>
-    <p>Issued: <%= returned_certs[i].issued %></p>
-    <p>Exceeds: <%= returned_certs[i].exceeds %></p>
     <p>Level: <%= returned_certs[i].level %></p>
     <p>Skillfield: <%= returned_certs[i].skillfield %></p>
     <p>Issued by: <%= returned_certs[i].company %></p>
     <p>Contact information: <%= returned_certs[i].contact %></p>
     <p>Description: <%= returned_certs[i].description %></p>
-    <label>Change contact information:</label>
-    <input type="text" id="email" name="email">
-    <input type="submit" value="Submit">
+    <form action="/staff" method="post">
+        <label>Change contact information:</label>
+        <input type="text" id=<%="email"+i %> name="email">
+        <input type="hidden" name="certificate_id" value=<%= returned_certs[i]._id %> />
+        <input type="submit" value="Submit">
+    </form>
     <br><br>    
 <% } %>
 </body>
