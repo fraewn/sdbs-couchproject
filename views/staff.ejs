@@ -1,0 +1,66 @@
+<html>
+<head>
+    <style>
+        body {
+            font-family: Verdana;
+        }
+        .nav {
+            text-align: center;
+            background: #363636
+        }
+        .navlist {
+            display: inline-block;
+            margin: 2em;
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+        .links {
+            color: antiquewhite;
+            font-size: medium;
+            text-decoration: none;
+            font-weight: inherit;
+        }
+        h1 {
+            color: blue;
+        }
+        h2 {
+            color: dodgerblue;
+        }
+    </style>
+
+</head>
+<body>
+<nav class=nav>
+    <ul>
+        <li class=navlist>
+            <a class=links href="index.html">Change profile information</a>
+        </li>
+        <li class=navlist>
+            <a class=links href="delete.html">Delete profile</a>
+        </li>
+        <li class=navlist>
+            <a class=links href="/logout">Logout</a>
+        </li>
+        <li class=navlist>
+            <a class=links href="staff.html">About</a>
+        </li>
+    </ul>
+</nav>
+
+<h1>View your certificates here:</h1>
+<% for(var i=0; i<returned_certs.length; i++){ %>
+    <h2><%= i + ". " + returned_certs[i].name %></h2>
+    <p>Issued: <%= returned_certs[i].issued %></p>
+    <p>Exceeds: <%= returned_certs[i].exceeds %></p>
+    <p>Level: <%= returned_certs[i].level %></p>
+    <p>Skillfield: <%= returned_certs[i].skillfield %></p>
+    <p>Issued by: <%= returned_certs[i].company %></p>
+    <p>Contact information: <%= returned_certs[i].contact %></p>
+    <p>Description: <%= returned_certs[i].description %></p>
+    <label>Change contact information:</label>
+    <input type="text" id="email" name="email">
+    <input type="submit" value="Submit">
+    <br><br>    
+<% } %>
+</body>
+

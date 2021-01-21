@@ -1,10 +1,9 @@
-const http = require('http')
 var express = require('express');
 var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
 var app = express();
-
+const request = require("request");
 const path = require('path')
 const fs = require('fs');
 const ini = require('ini');
@@ -57,6 +56,14 @@ app.get('/certs', function(req, res) {
     res.render("certs.ejs", {certificates: certificates});
   });
 });
+
+
+app.get('/staff', function(req, res) {
+  console.log("Looking up all different certs");
+  let returned_certs = GetAllAvailableCerts();
+  res.render("staff.ejs", {returned_certs: returned_certs});
+});
+
 
 app.get('/logout', function(req, res) {
   console.log("\nUser with id '" + globalUserId + "' was logged out.");
@@ -119,6 +126,25 @@ app.post('/cert', function(req, res) {
     view_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + '/_design/user/_view/login?key="' + req.body.email + '"&value="' + req.body.password +'"';
     console.log("view login request: " + view_request);
     var query_start = new Date();
+
+    request.get(view_request, (error, response, body) => {
+      let json = JSON.parse(body);
+      console.log("view request is: " +  JSON.stringify(json));
+      var query_end = new Date() - query_start;
+      console.log("View Login too: " + query_end + "ms");
+      for (var i = 0; i < json["rows"].length; i++){
+        if(json["rows"][i]["value"] == req.body.password){
+          success = true;
+        }
+      }
+      if (success){    //did we find the user + password?
+        setGlobalUserId(json["rows"][0]["id"]);
+        res.redirect("/certs");
+      }else {
+        res.sendFile(path.join(__dirname, './public/login.html'));
+      }
+  });
+    /*
     http.get(view_request, (resp) => {
       let data = '';
       resp.on('data', (chunk) => {
@@ -143,7 +169,7 @@ app.post('/cert', function(req, res) {
           res.sendFile(path.join(__dirname, './public/login.html'));
         }
       });
-    });
+    });*/
   }
       
 
@@ -331,6 +357,45 @@ async function getCertificatesForAUser(id) {
   const certs = doc.certificates;
   return certs;
 }
+
+/*
+function GetAllAvailableCerts(){
+  let document_by_id_request = 'http://' + username + ":" + password + "@"+ host + ":" + port +"/" + database + "/";
+  let certificates_request = document_by_id_request+ "certificate_ids";
+  let certificates = []
+  http.get(certificates_request, (resp) => {
+    let data = '';
+    resp.on('data', (chunk) => {
+      data += chunk;
+    });
+    resp.on('end', () => {
+      parsed_response = JSON.parse(data);
+      console.log("Parsed certificates_request Response: " + JSON.stringify(parsed_response));
+
+      for (var i = 0; i < parsed_response["cert_ids"].length; i++){
+          http.get(certificates_request, (resp) => {
+          let data = '';
+          resp.on('data', (chunk) => {
+            data += chunk;
+          });
+
+          resp.on('end', () => {
+            certificates.push(JSON.parse(data));
+          });
+        });
+      }
+      //if (success){    //did we find the user + password?
+      // setGlobalUserId(parsed_response["rows"][0]["id"]);
+      //  res.redirect("/certs");
+      //}else {
+      //  res.sendFile(path.join(__dirname, './public/login.html'));
+      //}
+    });
+  });
+  console.log("All certs: " + certificates);
+  return certificates;
+}
+*/
 
 //getUser('028f56ee0f8581ccaf35581f81001ac3');
 
