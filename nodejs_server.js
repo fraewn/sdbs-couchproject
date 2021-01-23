@@ -10,6 +10,7 @@ const fs = require('fs');
 const ini = require('ini');
 const { hostname } = require('os');
 const querystring = require('querystring');
+const PDFDocument = require('pdfkit');
 
 
 // for parsing application/json
@@ -172,8 +173,6 @@ app.post('/staff', function(req, res) {
 
     console.log("redirecting to staff");
     res.redirect("/staff");
-
-
     //doRequest(update_contact_request, "PUT", true, true).then((updated_doc) => {
    //   console.log("Updated doc: " + updated_doc);
     //});
@@ -185,6 +184,48 @@ app.post('/staff', function(req, res) {
   //use mango..
 
 });
+
+app.post('/downloadcert', function(req, res) {
+  console.log("Got a download request for: " + req.body.certificate);
+
+  getCertificatesForAUser(globalUserId).then(certs => {
+    //console.log(certs);
+    for (let i = 0; i < certs.length; i++){
+        let cert = certs[i];
+        if (certs[i].id == req.body.certificate){
+
+          let pdfDoc = new PDFDocument;
+         
+          let stream =fs.createWriteStream(req.body.certificate + ".pdf");  
+          pdfDoc.fontSize(40);
+          pdfDoc.text(cert.name,{align: "center"});
+          pdfDoc.moveDown();
+          pdfDoc.fontSize(20);
+          pdfDoc.text(cert.skillfield,{align: "center"});
+          pdfDoc.moveDown();
+          pdfDoc.moveDown();
+          pdfDoc.fontSize(12);
+          pdfDoc.text(cert.description,{align: "left"});
+          pdfDoc.moveDown();
+          pdfDoc.fontSize(8);
+          pdfDoc.text("Issued: " + cert.issued,{align: "left"});
+          pdfDoc.moveDown();
+          pdfDoc.text("Exceeds: " + cert.exceeds,{align: "left"});
+          pdfDoc.moveDown();
+          pdfDoc.image("certified.png", 60, 400, {align: "center", width: 500});
+          stream.on('finish', function() {
+            res.download(req.body.certificate + ".pdf");
+          });
+          pdfDoc.pipe(stream);
+          pdfDoc.end();
+          return;
+        }
+    }
+  });
+
+
+});
+
 
 
 app.get('/logout', function(req, res) {

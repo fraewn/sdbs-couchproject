@@ -1,0 +1,1 @@
+{"id":"ParAlg","skillfield":"Software Development","name":"Parallel Algorithms Certificate","level":3,"issued":"23.6.2019","exceeds":"14.8.2028","company":"Hector Corp","registration_date":"01.01.2010","contact":"Beverly@HectorCorp.com","description":"Parallel Algorithms Certificate: achieve half the speed with twice the hardware."}

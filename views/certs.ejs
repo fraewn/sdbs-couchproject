@@ -56,7 +56,12 @@
     <p>Skillfield: <%= certificates[i].skillfield %></p>
     <p>Issued by: <%= certificates[i].company %></p>
     <p>Contact information: <%= certificates[i].contact %></p>
-    <p>Description: <%= certificates[i].description %></p><br><br>    
+    <p>Description: <%= certificates[i].description %></p>
+    <form action="/downloadcert" method="post">
+        <input type="hidden" name="certificate" value=<%- certificates[i].id %> />
+        <input type="submit" value="Download">
+    </form>
+    <br><br>    
 <% } %>
 </body>
 
