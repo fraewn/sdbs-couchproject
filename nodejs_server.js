@@ -196,7 +196,7 @@ app.post('/downloadcert', function(req, res) {
 
           let pdfDoc = new PDFDocument;
          
-          let stream =fs.createWriteStream(req.body.certificate + ".pdf");  
+          let stream =fs.createWriteStream("pdf_download" + "/" +req.body.certificate + ".pdf");  
           pdfDoc.fontSize(40);
           pdfDoc.text(cert.name,{align: "center"});
           pdfDoc.moveDown();
@@ -214,7 +214,7 @@ app.post('/downloadcert', function(req, res) {
           pdfDoc.moveDown();
           pdfDoc.image("certified.png", 60, 400, {align: "center", width: 500});
           stream.on('finish', function() {
-            res.download(req.body.certificate + ".pdf");
+            res.download("pdf_download" + "/" +req.body.certificate + ".pdf");  
           });
           pdfDoc.pipe(stream);
           pdfDoc.end();
